@@ -1,11 +1,9 @@
 from .gamepiece import GamePiece
 
 class King(GamePiece):
-    def __init__(self, board, colour):
-        self.symbol = 'K'
-        super().__init__(board, colour)
+    symbol = 'K'
 
-    def get_possible_moves(self, x, y):
+    def get_possible_moves(self, board_state, x, y):
         unfiltered_result = []
 
         a = x
@@ -25,6 +23,6 @@ class King(GamePiece):
         unfiltered_result.append(bottom_right)
         unfiltered_result.append(bottom_left)
             
-        result = filter(lambda coord: self._board.check_bounds(coord[0], coord[1]), unfiltered_result)
+        result = filter(lambda coord: board_state.check_bounds(coord[0], coord[1]) and board_state.positions[coord[0]][coord[1]].colour != self.colour, unfiltered_result)
 
         return [x for x in result]

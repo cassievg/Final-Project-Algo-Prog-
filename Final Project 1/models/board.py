@@ -1,6 +1,7 @@
-from string import ascii_uppercase
+from libs.notation import get_files
 
-from models.exceptions import ChessException
+from .exceptions import ChessException
+from .gamepieces.king import King
 
 class EmptyCell:
     def __init__(self):
@@ -8,9 +9,10 @@ class EmptyCell:
         self.colour = ' '
 
 
-class Board:
-    def __init__(self, size):
-        self.size = size
+class BoardState:
+    def __init__(self, board_simulation):
+        self._board_simulation = board_simulation
+        self.size = board_simulation.size
         self.positions = [
             [
                 EmptyCell()
@@ -32,7 +34,7 @@ class Board:
         return not self.check_bounds(x, y) or self.is_empty(x, y)
     
     def show(self):
-        files = ascii_uppercase[0: self.size[0]]
+        files = get_files(self.size[1])
 
         files_row = '  '
         for file in files:
@@ -49,9 +51,9 @@ class Board:
         elif isinstance(self.positions[x][y], EmptyCell):
             raise ChessException('This is an empty cell.')
         else:
-            possible_moves = self.positions[x][y].get_possible_moves(x, y)
+            possible_moves = self.positions[x][y].get_clean_moves(self._board_simulation, x, y)
 
-            files = ascii_uppercase[0: self.size[0]]
+            files = get_files(self.size[1])
 
             files_row = '  '
             for file in files:
@@ -75,7 +77,7 @@ class Board:
                 print(str(self.size[1] - i) + '|' + row_string + '|')
 
     def can_move(self, x_from, y_from, x_to, y_to):
-        return [x_to, y_to] in self.positions[x_from][y_from].get_possible_moves(x_from, y_from)
+        return [x_to, y_to] in self.positions[x_from][y_from].get_clean_moves(self._board_simulation, x_from, y_from)
  
     def remove(self, x, y):
         self.positions[x][y] = EmptyCell()
@@ -84,24 +86,39 @@ class Board:
         self.positions[x][y] = unit
 
     def move(self, x_from, y_from, x_to, y_to):
-        if not self.can_move(x_from, y_from, x_to, y_to):
-            raise ChessException('Movement illegal')
-        
         self.place(self.positions[x_from][y_from], x_to, y_to)
         self.remove(x_from, y_from)
 
-    def is_notation(self, notation):
-        return notation[0] in ascii_uppercase and notation[1:].isnumeric()
+    def is_checked(self, player_colour):
+        result = False
+        for x, row in enumerate(self.positions):
+            for y, unit in enumerate(row):
+                if isinstance(unit, King) and unit.colour == player_colour:
+                    result = unit.is_targetted(self, x, y)
+                
+        return result
+    
+    def has_clean_moves(self, player_colour):
+        result = False
+        for x, row in enumerate(self.positions):
+            for y, unit in enumerate(row):
+                if not EmptyCell and len(unit.get_clean_moves(self._board_simulation, x, y)) != 0 and unit.colour == player_colour:
+                    result = True
 
-    def notation_to_index(self, notation):
-        index = [int(self.size[1]) - int(notation[1:]), ascii_uppercase.index(notation[0])]
-        return index
+        return result
 
-    def index_to_notation(self, index):
-        notation = str(ascii_uppercase[int(index[1])]) + str(int(self.size[1]) + 1 - int(index[0]))
-        return notation
+class BoardSimulation:
+    def __init__(self, size):
+        self.size = size
+        self._board_state = BoardState(self)
 
-if __name__ == '__main__':
-    board = Board([12, 13])
-    print(board.notation_to_index('A10'))
-    print(board.index_to_notation([4,0]))
+    def get_current_state(self):
+        copied_board = BoardState(self)
+        for x, row in enumerate(self._board_state.positions):
+            for y, unit in enumerate(row):
+                copied_board.place(unit, x, y)
+
+        return copied_board
+
+    def save_state(self, state):
+        self._board_state = state
