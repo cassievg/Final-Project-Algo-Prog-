@@ -1,4 +1,4 @@
-from libs.notation import notation_to_index, is_notation
+from libs.notation import notation_to_index, is_notation, index_to_notation
 
 from models.exceptions import ChessException
 
@@ -6,7 +6,7 @@ class Player:
     def __init__(self, colour):
         self.colour = colour
 
-    def select_piece(self, board_simulation, current_board_state):
+    def get_select_piece(self, board_simulation, current_board_state):
         selected_piece = input('Select Piece (by chess notation): ')
         if not is_notation(selected_piece):
             raise ChessException('Invalid notation')
@@ -26,7 +26,7 @@ class Player:
 
         return selected_piece_index
 
-    def move_piece(self, board, x_from, y_from):
+    def get_move_piece(self, board, x_from, y_from):
         move_to = input('Move Piece (by chess notation): ')
         if move_to == '':
             return None
@@ -39,3 +39,18 @@ class Player:
             raise ChessException('Invalid move')
         
         return move_to_index
+    
+    def get_replace_piece(self, board, piece_coord, available_pieces):
+        piece_notation = index_to_notation(piece_coord, board.size[1])
+        symbols = {
+            piece.symbol: piece
+            for piece in available_pieces
+        }
+        change_to = input('Change %s to (%s): ' % (piece_notation, ', '.join(symbols)))
+
+        if change_to not in symbols:
+            raise ChessException('Invalid selection')
+        
+        change_to = symbols[change_to]
+
+        return change_to

@@ -1,6 +1,10 @@
 class GamePiece(object):
     def __init__(self, colour):
         self.colour = colour
+        self.has_moved = False
+
+    def moved(self):
+        self.has_moved = True
 
     def is_targetted(self, current_board_state, x, y):
         result = False

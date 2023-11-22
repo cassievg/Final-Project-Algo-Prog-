@@ -58,6 +58,16 @@ class Game:
         current_board_state.place(Pawn(self._players[1].colour, 'down'), 1, 7)
         self._board_simulation.save_state(current_board_state)
 
+    def get_pawn_at_border(self, current_board_state):
+        result = None
+        last_pawn_position = [0, self._board_simulation.size[1] - 1]
+        x = last_pawn_position[self._no_of_turns % 2]
+        for y, unit in enumerate(current_board_state.positions[x]):
+            if isinstance(unit, Pawn):
+                result = [x, y]
+
+        return result
+
     def is_checkmate(self):
         current_player = self._players[self._no_of_turns % 2]
         current_board_state = self._board_simulation.get_current_state()
@@ -66,7 +76,7 @@ class Game:
     def is_stalemate(self):
         current_player = self._players[self._no_of_turns % 2]
         current_board_state = self._board_simulation.get_current_state()
-        return current_board_state.has_clean_moves(current_player.colour)
+        return not current_board_state.has_clean_moves(current_player.colour)
     
     def _next_turn(self):
         done = False
@@ -84,16 +94,22 @@ class Game:
                 current_board_state.show()
                 print()
 
-                selected_position = current_player.select_piece(self._board_simulation, current_board_state)
+                selected_position = current_player.get_select_piece(self._board_simulation, current_board_state)
                 print()
 
                 current_board_state.show_possible_moves(selected_position[0], selected_position[1])
 
-                move_piece = current_player.move_piece(current_board_state, selected_position[0], selected_position[1])
+                move_piece = current_player.get_move_piece(current_board_state, selected_position[0], selected_position[1])
                 print()
 
                 if move_piece is not None:
                     current_board_state.move(selected_position[0], selected_position[1], move_piece[0], move_piece[1])
+                    border_pawn = self.get_pawn_at_border(current_board_state)
+                    if border_pawn is not None:
+                        available_pieces = [Rook, Bishop, Knight, Queen]
+                        chosen_piece = current_player.get_replace_piece(current_board_state, move_piece, available_pieces)
+                        current_board_state.place(chosen_piece(current_player.colour), border_pawn[0], border_pawn[1])
+                    
                     self._board_simulation.save_state(current_board_state)
                     self._no_of_turns += 1
                     done = True
@@ -110,6 +126,9 @@ class Game:
         if self.is_checkmate():
             self._no_of_turns += 1
             current_player = self._players[self._no_of_turns % 2]
+            current_board_state = self._board_simulation.get_current_state()
+            current_board_state.show()
+            
             print('Player %s won' % current_player.colour)
 
         elif self.is_stalemate():

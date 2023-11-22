@@ -102,7 +102,7 @@ class BoardState:
         result = False
         for x, row in enumerate(self.positions):
             for y, unit in enumerate(row):
-                if not EmptyCell and len(unit.get_clean_moves(self._board_simulation, x, y)) != 0 and unit.colour == player_colour:
+                if not isinstance(unit, EmptyCell) and len(unit.get_clean_moves(self._board_simulation, x, y)) != 0 and unit.colour == player_colour:
                     result = True
 
         return result
@@ -121,4 +121,5 @@ class BoardSimulation:
         return copied_board
 
     def save_state(self, state):
+        # Before replacing state, check if the gamepiece is moved by comparing current state with new one
         self._board_state = state

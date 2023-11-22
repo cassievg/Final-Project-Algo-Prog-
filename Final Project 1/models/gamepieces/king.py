@@ -15,6 +15,8 @@ class King(GamePiece):
         bottom = [a, b-1]
         bottom_right = [a+1, b-1]
         bottom_left = [a-1, b-1]
+        left = [a+1, b]
+        right = [a-1, b]
 
         unfiltered_result.append(top)
         unfiltered_result.append(top_right)
@@ -22,6 +24,8 @@ class King(GamePiece):
         unfiltered_result.append(bottom)
         unfiltered_result.append(bottom_right)
         unfiltered_result.append(bottom_left)
+        unfiltered_result.append(right)
+        unfiltered_result.append(left)
             
         result = filter(lambda coord: board_state.check_bounds(coord[0], coord[1]) and board_state.positions[coord[0]][coord[1]].colour != self.colour, unfiltered_result)
 

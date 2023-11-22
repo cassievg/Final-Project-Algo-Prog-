@@ -8,7 +8,7 @@ def notation_to_index(notation, file_size):
     return index
 
 def index_to_notation(index, file_size):
-    notation = str(ascii_uppercase[int(index[1])]) + str(int(file_size) + 1 - int(index[0]))
+    notation = str(ascii_uppercase[int(index[1])]) + str(int(file_size) - int(index[0]))
     return notation
 
 def get_files(file_size):
