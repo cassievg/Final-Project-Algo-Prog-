@@ -121,5 +121,8 @@ class BoardSimulation:
         return copied_board
 
     def save_state(self, state):
-        # Before replacing state, check if the gamepiece is moved by comparing current state with new one
+        for x, row in enumerate(state):
+            for y, unit in enumerate(row):
+                if not isinstance(unit, self._board_state.positions[x][y]):
+                    unit.moved()
         self._board_state = state
