@@ -2,6 +2,7 @@ from libs.notation import get_files
 
 from .exceptions import ChessException
 from .gamepieces.king import King
+from .gamepieces.rook import Rook
 
 class EmptyCell:
     def __init__(self):
@@ -32,6 +33,9 @@ class BoardState:
 
     def is_empty_or_out_of_bounds(self, x, y):
         return not self.check_bounds(x, y) or self.is_empty(x, y)
+    
+    def is_rook(self, x, y):
+        return isinstance(self.positions[x][y], Rook)
     
     def show(self):
         files = get_files(self.size[1])
@@ -121,8 +125,15 @@ class BoardSimulation:
         return copied_board
 
     def save_state(self, state):
-        for x, row in enumerate(state):
-            for y, unit in enumerate(row):
-                if not isinstance(unit, self._board_state.positions[x][y]):
-                    unit.moved()
+        init_board = True
+        for row in self._board_state.positions:
+            for unit in row:
+                if not isinstance(unit, EmptyCell):
+                    init_board = False
+        
+        if not init_board:
+            for x, row in enumerate(state.positions):
+                for y, unit in enumerate(row):
+                    if not isinstance(unit, EmptyCell) and type(unit) != type(self._board_state.positions[x][y]):
+                        unit.moved()
         self._board_state = state

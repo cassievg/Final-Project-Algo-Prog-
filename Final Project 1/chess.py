@@ -104,6 +104,20 @@ class Game:
 
                 if move_piece is not None:
                     current_board_state.move(selected_position[0], selected_position[1], move_piece[0], move_piece[1])
+                    prev_board_state = self._board_simulation.get_current_state()
+
+                    if isinstance(prev_board_state.positions[7][4], King) and isinstance(current_board_state.positions[7][2], King) :
+                        current_board_state.move(7, 0, 7, 3)
+                        
+                    if isinstance(prev_board_state.positions[7][4], King) and isinstance(current_board_state.positions[7][6], King) :
+                        current_board_state.move(7, 7, 7, 5)
+
+                    if isinstance(prev_board_state.positions[0][4], King) and isinstance(current_board_state.positions[0][2], King):
+                        current_board_state.move(0, 0, 0, 3)
+                        
+                    if isinstance(prev_board_state.positions[0][4], King) and isinstance(current_board_state.positions[0][6], King):
+                        current_board_state.move(0, 7, 0, 5)
+
                     border_pawn = self.get_pawn_at_border(current_board_state)
                     if border_pawn is not None:
                         available_pieces = [Rook, Bishop, Knight, Queen]
