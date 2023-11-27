@@ -1,17 +1,36 @@
-from libs.notation import notation_to_index, is_notation, index_to_notation
+import eel
+from libs.notation import index_to_notation
 
 from models.exceptions import ChessException
 
+
 class Player:
-    def __init__(self, colour):
+    def __init__(self, name, colour):
+        self.name = name
         self.colour = colour
 
-    def get_select_piece(self, board_simulation, current_board_state):
-        selected_piece = input('Select Piece (by chess notation): ')
-        if not is_notation(selected_piece):
-            raise ChessException('Invalid notation')
+    def _input_selected_position(self, game):
+        result = eel.get_selected_position()()
+        while result is None:
+            eel.sleep(0.1)
+            if not game.is_running:
+                raise ChessException('Stop')
+            result = eel.get_selected_position()()
+        return result
+    
+    def _input_replace_pawn(self, game):
+        eel.show_replace_pawn()()
+        result = eel.get_replace_pawn()()
+        while result is None:
+            eel.sleep(0.1)
+            if not game.is_running:
+                raise ChessException('Stop')
+            result = eel.get_replace_pawn()()
+        return result
 
-        selected_piece_index = notation_to_index(selected_piece, board_simulation.size[1])
+    def get_select_piece(self, game, board_simulation, current_board_state):
+        selected_piece_index = self._input_selected_position(game)
+
         if not current_board_state.check_bounds(selected_piece_index[0], selected_piece_index[1]):
             raise ChessException('This is out of bounds')
 
@@ -26,27 +45,20 @@ class Player:
 
         return selected_piece_index
 
-    def get_move_piece(self, board, x_from, y_from):
-        move_to = input('Move Piece (by chess notation): ')
-        if move_to == '':
-            return None
+    def get_move_piece(self, game, board, x_from, y_from):        
+        move_to_index = self._input_selected_position(game)
 
-        if not is_notation(move_to):
-            raise ChessException('Invalid notation')
-
-        move_to_index = notation_to_index(move_to, board.size[1])
         if not board.can_move(x_from, y_from, move_to_index[0], move_to_index[1]):
             raise ChessException('Invalid move')
         
         return move_to_index
     
-    def get_replace_piece(self, board, piece_coord, available_pieces):
-        piece_notation = index_to_notation(piece_coord, board.size[1])
+    def get_replace_piece(self, game, available_pieces):
         symbols = {
             piece.symbol: piece
             for piece in available_pieces
         }
-        change_to = input('Change %s to (%s): ' % (piece_notation, ', '.join(symbols)))
+        change_to = self._input_replace_pawn(game)
 
         if change_to not in symbols:
             raise ChessException('Invalid selection')

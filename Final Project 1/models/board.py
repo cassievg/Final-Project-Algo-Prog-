@@ -1,4 +1,4 @@
-from libs.notation import get_files
+import eel
 
 from .exceptions import ChessException
 from .gamepieces.king import King
@@ -38,16 +38,17 @@ class BoardState:
         return isinstance(self.positions[x][y], Rook)
     
     def show(self):
-        files = get_files(self.size[1])
+        result = []
+        for row in self.positions:
+            row_result = []
+            for unit in row:
+                if isinstance(unit, EmptyCell):
+                    row_result.append(None)
+                else:
+                    row_result.append({'type': 'piece', 'name': unit.__class__.__name__.lower(), 'colour': unit.colour})
+            result.append(row_result)
 
-        files_row = '  '
-        for file in files:
-            files_row += file + '  '
-
-        print(files_row)
-
-        for index, unit_list in enumerate(self.positions):
-            print(str(self.size[1] - index) + '|' + '|'.join([unit.colour + unit.symbol for unit in unit_list]) + '|')
+        eel.show_board(result)()
 
     def show_possible_moves(self, x, y):
         if not self.check_bounds(x, y):
@@ -57,28 +58,22 @@ class BoardState:
         else:
             possible_moves = self.positions[x][y].get_clean_moves(self._board_simulation, x, y)
 
-            files = get_files(self.size[1])
-
-            files_row = '  '
-            for file in files:
-                files_row += file + '  '
-
-            print(files_row)
+            result = []
             for i, unit_list in enumerate(self.positions):
-                row_string = ''
+                row_result = []
                 for j, unit in enumerate(unit_list):
                     if [i, j] in possible_moves:
                         if not isinstance(unit, EmptyCell):
-                            row_string += unit.colour + unit.symbol.lower()
+                            row_result.append({'type': 'piece', 'name': unit.__class__.__name__.lower(), 'colour': unit.colour, 'is_eaten': True})
                         else:
-                            row_string += 'XX'
+                            row_result.append({'type': 'move'})
                     else:
-                        row_string += unit.colour + unit.symbol
-
-                    if j != len(unit_list) - 1:
-                        row_string += '|'
-                
-                print(str(self.size[1] - i) + '|' + row_string + '|')
+                        if not isinstance(unit, EmptyCell):
+                            row_result.append({'type': 'piece', 'name': unit.__class__.__name__.lower(), 'colour': unit.colour})
+                        else:
+                            row_result.append(None)
+                result.append(row_result)
+            eel.show_board(result)()
 
     def can_move(self, x_from, y_from, x_to, y_to):
         return [x_to, y_to] in self.positions[x_from][y_from].get_clean_moves(self._board_simulation, x_from, y_from)

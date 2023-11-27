@@ -1,0 +1,120 @@
+<html>
+    <head>
+        <script src="./jquery-3.7.1.min.js"></script>
+        <script type="text/javascript" src="/eel.js"></script>
+        <link href="./style.css" rel="stylesheet">
+        <title>
+            Chess
+        </title>
+    </head>
+    <body>
+        <div id="chess_info"></div>
+        <div id="chess_board"></div>
+        <div id="replace_pawn" class="modal-wrapper">
+            <div class="modal-container">
+                <button type="button" name="pawn_choice" value="B">Bishop</button>
+                <button type="button" name="pawn_choice" value="N">Knight</button>
+                <button type="button" name="pawn_choice" value="R">Rook</button>
+                <button type="button" name="pawn_choice" value="Q">Queen</button>
+            </div>
+        </div>
+        <div id="restart">
+            <button type="button" name="restart" value="restart">Restart</button>
+        </div>
+    </body>
+    <script>
+        let selected_position = null;
+
+        function init_board(size) {
+            $('#chess_board').empty();
+            for (let i = 0; i < size[0]; i++) {
+                let row = $("<div class='row'></div>");
+                for (let j = 0; j < size[1]; j++) {
+                    let cell = $("<div class='cell'></div>").attr('id', `${i}_${j}`);
+                    if ((i+j) % 2 === 0) {
+                        cell.addClass('white');
+                    }
+                    else {
+                        cell.addClass('black');
+                    }
+                    row.append(cell);
+                }
+                $('#chess_board').append(row);
+            }
+        }
+
+        function show_board(positions) {
+            $('.cell').empty();
+
+            for (let i = 0; i < positions.length; i++) {
+                for (let j = 0; j < positions[i].length; j++) {
+                    if (positions[i][j] !== null) {
+                        let piece = $("<div class='piece'></div>");
+                        let cell = positions[i][j];
+                        if (cell['type'] === 'piece') {
+                            piece.append(`<img src='pieces/${positions[i][j]['name']}_${positions[i][j]['colour']}.png'>`);
+                            
+                            if (cell['is_eaten']) {
+                                piece.addClass('highlight');
+                            }
+                        }
+                        else if (cell['type'] === 'move') {
+                            piece.addClass('highlight');
+                        }
+
+                        piece.on('click', () => {
+                            selected_position = [i, j];
+                        });
+
+                        $(`#${i}_${j}`).append(piece);
+                    }
+                }
+            }
+        }
+
+        function get_selected_position() {
+            let result = selected_position;
+            if (selected_position !== null) {
+                selected_position = null;
+            }
+            return result;
+        }
+
+        let selected_piece = null;
+
+        function get_replace_pawn() {
+            let piece = selected_piece;
+            if (selected_piece !== null) {
+                selected_piece = null;
+            }
+            return piece;
+        }
+
+        function show_replace_pawn() {
+            $('#replace_pawn').show();
+        }
+
+        function show_game_stats(stats) {
+            $('#chess_info').text(stats)
+        }
+
+        $(() => {
+            eel.start_game()();
+            $('#replace_pawn').hide();
+            $('button[name=pawn_choice]').on('click', function() {
+                selected_piece = $(this).val();
+                $('#replace_pawn').hide();
+            });
+            $('button[name=restart]').on('click', function() {
+                eel.start_game()();
+            })
+        });
+
+        eel.expose(init_board);
+        eel.expose(show_board);
+        eel.expose(get_selected_position);
+        eel.expose(get_replace_pawn);
+        eel.expose(show_replace_pawn);
+        eel.expose(show_game_stats);
+    </script>
+</html>
