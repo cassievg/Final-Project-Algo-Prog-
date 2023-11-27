@@ -1,4 +1,3 @@
-import os
 import eel
 
 from models.board import BoardSimulation
@@ -166,5 +165,5 @@ def start_game():
 
 
 if __name__ == '__main__':
-    eel.init(os.path.abspath('views'))
+    eel.init('views')
     eel.start('index.html')
