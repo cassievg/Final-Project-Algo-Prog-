@@ -1,2 +1,0 @@
-class ChessException(Exception):
-    pass

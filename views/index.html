@@ -8,8 +8,8 @@
         </title>
     </head>
     <body>
-        <div id="chess_info"></div>
-        <div id="chess_board"></div>
+        <h3><div id="chess_info"></div></h3>
+        <div id="chess_board"></div><br>
         <div id="replace_pawn" class="modal-wrapper">
             <div class="modal-container">
                 <button type="button" name="pawn_choice" value="B">Bishop</button>
@@ -18,19 +18,26 @@
                 <button type="button" name="pawn_choice" value="Q">Queen</button>
             </div>
         </div>
+        <br>
+        <h3>
         <div id="restart">
             <button type="button" name="restart" value="restart">Restart</button>
         </div>
+        </h3>
     </body>
     <script>
         let selected_position = null;
 
+        // Initializes board
         function init_board(size) {
             $('#chess_board').empty();
+
             for (let i = 0; i < size[0]; i++) {
                 let row = $("<div class='row'></div>");
                 for (let j = 0; j < size[1]; j++) {
                     let cell = $("<div class='cell'></div>").attr('id', `${i}_${j}`);
+
+                    // This makes the alternating black and white pattern on the chess board
                     if ((i+j) % 2 === 0) {
                         cell.addClass('white');
                     }
@@ -43,35 +50,45 @@
             }
         }
 
+        // Displays board and all its positions
         function show_board(positions) {
             $('.cell').empty();
 
             for (let i = 0; i < positions.length; i++) {
                 for (let j = 0; j < positions[i].length; j++) {
                     if (positions[i][j] !== null) {
+
                         let piece = $("<div class='piece'></div>");
                         let cell = positions[i][j];
+
                         if (cell['type'] === 'piece') {
                             piece.append(`<img src='pieces/${positions[i][j]['name']}_${positions[i][j]['colour']}.png'>`);
                             
+                            // Highlight is the possible move of the piece
+                            // If piece can eat, highlight the target
                             if (cell['is_eaten']) {
                                 piece.addClass('highlight');
                             }
                         }
+
+                        // Highlight all the possible moves of the selected piece
                         else if (cell['type'] === 'move') {
                             piece.addClass('highlight');
                         }
 
+                        // Takes clicked position and puts it in variable
                         piece.on('click', () => {
                             selected_position = [i, j];
                         });
 
+                        // Puts piece in position
                         $(`#${i}_${j}`).append(piece);
                     }
                 }
             }
         }
 
+        // Takes the selected position
         function get_selected_position() {
             let result = selected_position;
             if (selected_position !== null) {
@@ -82,6 +99,7 @@
 
         let selected_piece = null;
 
+        // Takes the input piece that will replace pawn at the end of the board
         function get_replace_pawn() {
             let piece = selected_piece;
             if (selected_piece !== null) {
@@ -90,26 +108,35 @@
             return piece;
         }
 
+        // Shows the replace pawn modal
         function show_replace_pawn() {
             $('#replace_pawn').show();
         }
 
+        // Display game stats
         function show_game_stats(stats) {
             $('#chess_info').text(stats)
         }
 
         $(() => {
             eel.start_game()();
+
+            // Hides replace pawn modal at start of the game
             $('#replace_pawn').hide();
+
+            // After selecting piece to replace pawn, hides modal again and puts the input value into the variable selected_piece
             $('button[name=pawn_choice]').on('click', function() {
                 selected_piece = $(this).val();
                 $('#replace_pawn').hide();
             });
+
+            // Restart button basically just starts a new game
             $('button[name=restart]').on('click', function() {
                 eel.start_game()();
             })
         });
 
+        // Below is to expose the JQUery functions to be used in the python
         eel.expose(init_board);
         eel.expose(show_board);
         eel.expose(get_selected_position);

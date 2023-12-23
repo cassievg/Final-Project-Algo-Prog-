@@ -3,6 +3,7 @@ from .gamepiece import GamePiece
 class Knight(GamePiece):
     symbol = 'N'
 
+    # Movement set of knight
     def get_possible_moves(self, board_state, x, y):
         unfiltered_result = []
 
@@ -26,6 +27,7 @@ class Knight(GamePiece):
         unfiltered_result.append(left_top)
         unfiltered_result.append(left_bottom)
 
+        # Remove appended results that are out of bounds
         result = filter(lambda coord: board_state.check_bounds(coord[0], coord[1]) and board_state.positions[coord[0]][coord[1]].colour != self.colour, unfiltered_result)
 
         return [x for x in result]

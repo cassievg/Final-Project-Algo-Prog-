@@ -3,6 +3,7 @@ from .gamepiece import GamePiece
 class Bishop(GamePiece):
     symbol = 'B'
 
+    # Movement set of bishop
     def get_possible_moves(self, board_state, x, y):
         result = []
 
